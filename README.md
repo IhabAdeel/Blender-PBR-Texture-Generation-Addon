@@ -3,6 +3,7 @@ A Blender Addon that generates PBR Textures (Albedo, AO, Specular, Roughness, Bu
 
 This addon only works on Blender 2.8 and beyond
 
+                         ORIGINAL                                           GENERATED
 [![Example](https://user-images.githubusercontent.com/43339338/76030875-95053d80-5f5c-11ea-8454-2cdbe3a5af7c.png)]()
 
 ## Installing
@@ -33,7 +34,7 @@ C:\Program Files\Blender Foundation\Blender 2.82\2.82\scripts\addons
 3. Generate Textures: This will generate all the required textures and save them in a new/existing folder in the image source location. This will also setup the nodes necessary and the object will be for rendering, all the changes will be seen immediately in the viewport 
 4. Purge Selected Unused: This will delete all unused Materials of the same name as that as the one selected currently. This will help remove all the duplicates which may have been generated while editing the textures.
 5. Purge All Unused: This will delete ALL materials which are not in use by the object.
-
+      
 [![Sub Panel](https://user-images.githubusercontent.com/43339338/76028700-2377c000-5f59-11ea-94fe-bdf33caaed5d.png)]()
 1. Invert: Use this if you wish to invert the respective Texture Map (this can be done in the node editor as well)
 2. Saturation: Use to control the saturation between the Black and White areas of the image for the respective map, min = -5 , max = +5
@@ -53,6 +54,7 @@ The addon has default values for all the above fields and will generate results 
 5. Bump: Use for adjusting the effect of the effect of the bump and displacement maps
 
 ## Examples
+                        ORIGINAL                                     GENERATED
 [![eg1](https://user-images.githubusercontent.com/43339338/76033459-55d9eb00-5f62-11ea-9233-568771b7779e.png)]()
 [![eg2](https://user-images.githubusercontent.com/43339338/76033466-596d7200-5f62-11ea-9976-188be6b91264.png)]()
 [![eg3](https://user-images.githubusercontent.com/43339338/76033470-5d00f900-5f62-11ea-9e04-caf2e61020d3.png)]()
