@@ -32,7 +32,7 @@ from bpy.types import (Panel,
 
 from . nodeSetup import nodeSetup
 
-from . textureGenerator import textureGenerator
+from . textureGenerator import *
 
 # ------------------------------------------------------------------------
 #    Scene Properties
@@ -64,12 +64,6 @@ class MyProperties(PropertyGroup):
         default = False
         )
 
-    d_invert: BoolProperty(
-        name="Invert Displacement",
-        description="Invert Displacement",
-        default = False
-        )
-
     b_bright: IntProperty(
         name = "Bump Brightness",
         description="Bump Brightness",
@@ -97,14 +91,6 @@ class MyProperties(PropertyGroup):
     a_bright: IntProperty(
         name = "AO Brightness",
         description="AO Brightness",
-        default = 0,
-        min = -127,
-        max = 127
-        )
-
-    d_bright: IntProperty(
-        name = "Displacement Brightness",
-        description="Displacement Brightness",
         default = 0,
         min = -127,
         max = 127
@@ -142,52 +128,36 @@ class MyProperties(PropertyGroup):
         max = 5
         )
 
-    d_gamma: FloatProperty(
-        name = "Displacement Gamma",
-        description = "Displacement Gamma",
-        default = 1,
-        min = 0,
-        max = 5
-        )
-
     b_sat: FloatProperty(
         name = "Bump Saturation",
         description = "Bump Saturation",
         default = 1,
-        min = -5,
-        max = 5
+        min = -50,
+        max = 50
         )
 
     s_sat: FloatProperty(
         name = "Specular Saturation",
         description = "Specular Saturation",
         default = 1,
-        min = -5,
-        max = 5
+        min = -50,
+        max = 50
         )
 
     r_sat: FloatProperty(
         name = "Roughness Saturation",
         description = "Roughness Saturation",
         default = 1,
-        min = -5,
-        max = 5
+        min = -50,
+        max = 50
         )
 
     a_sat: FloatProperty(
         name = "AO Saturation",
         description = "AO Saturation",
         default = 2,
-        min = -5,
-        max = 5
-        )
-
-    d_sat: FloatProperty(
-        name = "Displacement Saturation",
-        description = "Displacement Saturation",
-        default = 1.5,
-        min = -5,
-        max = 5
+        min = -50,
+        max = 50
         )
 
     s_threshold: IntProperty(
@@ -204,14 +174,6 @@ class MyProperties(PropertyGroup):
         default = 127,
         min = 0,
         max = 255
-        )
-
-    d_kernel: IntProperty(
-        name = "Kernel Smooth",
-        description="Kernel Smooth",
-        default = 11,
-        min = 5,
-        max = 105
         )
 
     mat_name: StringProperty(
@@ -244,9 +206,8 @@ class WM_OT_generateTextures(Operator):
         s_props = [mytool.s_invert, mytool.s_sat, mytool.s_bright, mytool.s_gamma, mytool.s_threshold]
         r_props = [mytool.r_invert, mytool.r_sat, mytool.r_bright, mytool.r_gamma]
         a_props = [mytool.a_invert, mytool.a_sat, mytool.a_bright, mytool.a_gamma, mytool.a_threshold]
-        d_props = [mytool.d_invert, mytool.d_sat, mytool.d_bright, mytool.d_gamma, mytool.d_kernel]
 
-        textureGenerator.main(mytool.image_path, mytool.mat_name, b_props, s_props, r_props, a_props, d_props)
+        textureGenerator.main(mytool.image_path, mytool.mat_name, b_props, s_props, r_props, a_props)
 
         return {'FINISHED'}
 
@@ -290,6 +251,54 @@ class WM_OT_purgeAll(Operator):
             if material.users or (material.users == 1 and material.use_fake_user):
                 continue
             bpy.data.materials.remove(material)
+
+        return {'FINISHED'}
+
+class WM_OT_fixAO(Operator):
+    bl_label = "Make Changes"
+    bl_idname = "wm.aochanges"
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
+        a_props = [mytool.a_invert, mytool.a_sat, mytool.a_bright, mytool.a_gamma, mytool.a_threshold]
+        textureGenerator.changes(a_props, 0)
+
+        return {'FINISHED'}
+
+class WM_OT_fixSpecular(Operator):
+    bl_label = "Make Changes"
+    bl_idname = "wm.specularchanges"
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
+        s_props = [mytool.s_invert, mytool.s_sat, mytool.s_bright, mytool.s_gamma, mytool.s_threshold]
+        textureGenerator.changes(s_props, 1)
+
+        return {'FINISHED'}
+
+class WM_OT_fixRoughness(Operator):
+    bl_label = "Make Changes"
+    bl_idname = "wm.roughnesschanges"
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
+        r_props = [mytool.r_invert, mytool.r_sat, mytool.r_bright, mytool.r_gamma]
+        textureGenerator.changes(r_props, 2)
+
+        return {'FINISHED'}
+
+class WM_OT_fixBump(Operator):
+    bl_label = "Make Changes"
+    bl_idname = "wm.bumpchanges"
+
+    def execute(self, context):
+        scene = context.scene
+        mytool = scene.my_tool
+        b_props = [mytool.b_invert, mytool.b_sat, mytool.b_bright, mytool.b_gamma]
+        textureGenerator.changes(b_props, 3)
 
         return {'FINISHED'}
 
@@ -340,6 +349,7 @@ class OBJECT_PT_AO(OBJECT_PT_CustomPanel, Panel):
         layout.prop(mytool, "a_bright")
         layout.prop(mytool, "a_gamma")
         layout.prop(mytool, "a_threshold")
+        layout.operator("wm.aochanges")
 
 class OBJECT_PT_SPECULAR(OBJECT_PT_CustomPanel, Panel):
     bl_parent_id = "OBJECT_PT_mainpanel"
@@ -356,6 +366,7 @@ class OBJECT_PT_SPECULAR(OBJECT_PT_CustomPanel, Panel):
         layout.prop(mytool, "s_bright")
         layout.prop(mytool, "s_gamma")
         layout.prop(mytool, "s_threshold")
+        layout.operator("wm.specularchanges")
 
 class OBJECT_PT_ROUGHNESS(OBJECT_PT_CustomPanel, Panel):
     bl_parent_id = "OBJECT_PT_mainpanel"
@@ -371,6 +382,7 @@ class OBJECT_PT_ROUGHNESS(OBJECT_PT_CustomPanel, Panel):
         layout.prop(mytool, "r_sat")
         layout.prop(mytool, "r_bright")
         layout.prop(mytool, "r_gamma")
+        layout.operator("wm.roughnesschanges")
 
 class OBJECT_PT_BUMP(OBJECT_PT_CustomPanel, Panel):
     bl_parent_id = "OBJECT_PT_mainpanel"
@@ -386,23 +398,7 @@ class OBJECT_PT_BUMP(OBJECT_PT_CustomPanel, Panel):
         layout.prop(mytool, "b_sat")
         layout.prop(mytool, "b_bright")
         layout.prop(mytool, "b_gamma")
-
-class OBJECT_PT_DISPLACEMENT(OBJECT_PT_CustomPanel, Panel):
-    bl_parent_id = "OBJECT_PT_mainpanel"
-    bl_label = "Displacement Map"
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        mytool = scene.my_tool
-
-        layout.prop(mytool, "d_invert")
-        layout.prop(mytool, "d_sat")
-        layout.prop(mytool, "d_bright")
-        layout.prop(mytool, "d_gamma")
-        layout.prop(mytool, "d_threshold")
-        layout.prop(mytool, "d_kernel")
+        layout.operator("wm.bumpchanges")
 
 # ------------------------------------------------------------------------
 #    Registration
@@ -418,7 +414,10 @@ classes = (
     OBJECT_PT_SPECULAR,
     OBJECT_PT_ROUGHNESS,
     OBJECT_PT_BUMP,
-    OBJECT_PT_DISPLACEMENT
+    WM_OT_fixAO,
+    WM_OT_fixBump,
+    WM_OT_fixRoughness,
+    WM_OT_fixSpecular
 )
 
 def register():
