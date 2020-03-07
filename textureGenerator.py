@@ -2,9 +2,14 @@ import cv2
 import numpy as np
 import os
 import shutil
-from . nodeSetup import nodeSetup 
+from . nodeSetup import * 
 
 class textureGenerator:
+
+    g_BaseImage = None
+    g_GrayImage = None
+    g_DstFolder = None
+
     def image_invert(image):
         return cv2.bitwise_not(image)
 
@@ -45,18 +50,11 @@ class textureGenerator:
             aoImage = textureGenerator.image_invert(aoImage)
         return aoImage
 
-    def displacement(grayScale, d_props):
-        displaceImage = cv2.convertScaleAbs(grayScale, alpha = d_props[1], beta = d_props[2])
-        displaceImage = cv2.bitwise_not(displaceImage)
-        displaceImage = cv2.convertScaleAbs(displaceImage, alpha = d_props[1], beta = d_props[2])
-        displaceImage = cv2.bitwise_not(displaceImage)
-        displaceImage = cv2.bilateralFilter(displaceImage, d_props[4], 75, 75)
-        displaceImage = textureGenerator.gamma_correction(displaceImage, d_props[3])
-        if d_props[0] == True:
-            displaceImage = textureGenerator.image_invert(displaceImage)
-        return displaceImage
-
-    def main(directory, name, b_props, s_props, r_props, a_props, d_props):
+    def main(directory, name, b_props, s_props, r_props, a_props):
+        
+        global g_BaseImage
+        global g_GrayImage
+        
         baseImage = cv2.imread(directory)
         grayScale = cv2.cvtColor(baseImage, cv2.COLOR_BGR2GRAY)
         grayScale = cv2.equalizeHist(grayScale)
@@ -65,29 +63,57 @@ class textureGenerator:
         specularImage = textureGenerator.specular(grayScale, s_props)
         roughnessImage = textureGenerator.roughness(grayScale, r_props)
         aoImage = textureGenerator.ambient(grayScale, a_props)
-        displaceImage = textureGenerator.displacement(grayScale, d_props)
+
+        g_BaseImage = baseImage
+        g_GrayImage = grayScale
         
-        image = [baseImage, grayScale, bumpImage, specularImage, roughnessImage, aoImage, displaceImage]
-        imageType = ["Base", "GrayScale", "Bump", "Specular", "Roughness", "AO", "Displacement"]
+        image = [baseImage, bumpImage, specularImage, roughnessImage, aoImage]
+        imageType = ["Base", "Bump", "Specular", "Roughness", "AO"]
 
         textureGenerator.saving(image, imageType, directory, name)
 
     def saving(image, imageType, directory, name):
         
+        global g_DstFolder
+
         parent = os.path.dirname(directory)
         dstFolder = parent + '\\' + name + '\\'
+
+        g_DstFolder = dstFolder
 
         if os.path.exists(dstFolder):
             shutil.rmtree(dstFolder)
         os.makedirs(dstFolder)
 
         for i in range(len(image)):
-            #cv2.imshow(imageType[i], cv2.resize(image[i], (300,300), image[i]))
-            #print(directory+imageType[i])
-            if os.path.exists(dstFolder + imageType[i] + ".jpg"):
-                os.remove(imageType[i] + ".jpg")
-            cv2.imwrite(dstFolder + imageType[i] + ".jpg", image[i])
-        #cv2.waitKey(0)
-        #cv2.destroyAllWindows()
+            if os.path.exists(dstFolder + imageType[i] + ".png"):
+                os.remove(imageType[i] + ".png")
+            cv2.imwrite(dstFolder + imageType[i] + ".png", image[i])
 
         nodeSetup.main(dstFolder, name)
+
+    def changes(props, type):
+        
+        name = None
+        global g_DstFolder
+        
+        if type == 0:
+            name = "AO"
+            Image = textureGenerator.ambient(g_GrayImage, props)
+        elif type == 1:
+            name = "Specular"
+            Image = textureGenerator.specular(g_GrayImage, props)
+        elif type == 2:
+            name = "Roughness"
+            Image = textureGenerator.roughness(g_GrayImage, props)
+        else:
+            name = "Bump"
+            Image = textureGenerator.bump(g_GrayImage, props)
+        
+        print(g_DstFolder + name + ".png")
+
+        if os.path.exists(g_DstFolder + name + ".png"):
+            os.remove(g_DstFolder + name + ".png")
+        cv2.imwrite(g_DstFolder + name + ".png", Image)      
+
+        nodeSetup.reload()
