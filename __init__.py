@@ -240,7 +240,7 @@ class WM_OT_generateTextures(Operator):
         scene = context.scene
         mytool = scene.my_tool
 
-        b_props = [mytool.a_invert, mytool.a_sat, mytool.a_bright, mytool.a_gamma]
+        b_props = [mytool.b_invert, mytool.b_sat, mytool.b_bright, mytool.b_gamma]
         s_props = [mytool.s_invert, mytool.s_sat, mytool.s_bright, mytool.s_gamma, mytool.s_threshold]
         r_props = [mytool.r_invert, mytool.r_sat, mytool.r_bright, mytool.r_gamma]
         a_props = [mytool.a_invert, mytool.a_sat, mytool.a_bright, mytool.a_gamma, mytool.a_threshold]
