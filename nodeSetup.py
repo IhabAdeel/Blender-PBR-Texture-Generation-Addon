@@ -1,4 +1,5 @@
 import bpy
+import os
 
 class nodeSetup:
     def reload():
@@ -36,35 +37,36 @@ class nodeSetup:
         #Specular Image    
         node = nodes.new('ShaderNodeTexImage')
         node.name = 'Specular'  
-        node.image = bpy.data.images.load(directory+'Specular.png')
+        print(directory)
+        node.image = bpy.data.images.load(os.path.join(directory, 'Specular.png'))
         node.image.colorspace_settings.name = 'Non-Color'      
         node.location = -325, 200
     
         #Roughness    
         node = nodes.new('ShaderNodeTexImage')
         node.name = 'Roughness'
-        node.image = bpy.data.images.load(directory+'Roughness.png')
+        node.image = bpy.data.images.load(os.path.join(directory, 'Roughness.png'))
         node.image.colorspace_settings.name = 'Non-Color'
         node.location = -325, -30
 
         #AO
         node = nodes.new('ShaderNodeTexImage')
         node.name = 'AO'
-        node.image = bpy.data.images.load(directory+'AO.png')
+        node.image = bpy.data.images.load(os.path.join(directory, 'AO.png'))
         node.image.colorspace_settings.name = 'Non-Color'
         node.location = -325, 430
 
         #Bump
         node = nodes.new('ShaderNodeTexImage')
         node.name = 'Bump'
-        node.image = bpy.data.images.load(directory+'Bump.png')
+        node.image = bpy.data.images.load(os.path.join(directory, 'Bump.png'))
         node.image.colorspace_settings.name = 'Non-Color'
         node.location = -325, -260
 
         #Base
         node = nodes.new('ShaderNodeTexImage')
         node.name = 'Base'
-        node.image = bpy.data.images.load(directory+'Base.png')
+        node.image = bpy.data.images.load(os.path.join(directory, 'Base.png'))
         node.location = -325, 660
 
         #RGB Curves

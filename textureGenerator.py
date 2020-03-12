@@ -77,7 +77,7 @@ class textureGenerator:
         global g_DstFolder
 
         parent = os.path.dirname(directory)
-        dstFolder = parent + '\\' + name + '\\'
+        dstFolder = os.path.join(parent, name)
 
         g_DstFolder = dstFolder
 
@@ -86,10 +86,10 @@ class textureGenerator:
         os.makedirs(dstFolder)
 
         for i in range(len(image)):
-            if os.path.exists(dstFolder + imageType[i] + ".png"):
+            if os.path.exists(os.path.join(dstFolder, imageType[i] + ".png")):
                 os.remove(imageType[i] + ".png")
-            cv2.imwrite(dstFolder + imageType[i] + ".png", image[i])
-
+            cv2.imwrite(os.path.join(dstFolder, imageType[i] + ".png"), image[i])
+        print(dstFolder)
         nodeSetup.main(dstFolder, name)
 
     def changes(props, type):
@@ -112,8 +112,8 @@ class textureGenerator:
         
         print(g_DstFolder + name + ".png")
 
-        if os.path.exists(g_DstFolder + name + ".png"):
-            os.remove(g_DstFolder + name + ".png")
-        cv2.imwrite(g_DstFolder + name + ".png", Image)      
+        if os.path.exists(os.path.join(g_DstFolder, name + ".png")):
+            os.remove(os.path.join(g_DstFolder, name + ".png"))
+        cv2.imwrite(os.path.join(g_DstFolder, name + ".png"), Image)      
 
         nodeSetup.reload()
